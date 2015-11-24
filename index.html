@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Play with Director</title>
+
+  <script src='https://google.github.io/traceur-compiler/bin/traceur.js'></script>
+  <script src='director.js'></script>
+</head>
+
+<body>
+  <h1>General Router</h1>
+  <ul>
+    <li>
+      <a data-href='/author' href='/author'>/author</a>
+    </li>
+    <li>
+      <a data-href='/books' href='/books'>/books</a>
+    </li>
+    <li>
+      <a data-href='/books/view/1' href='/books/view/1'>/books/view/1</a>
+    </li>
+  </ul>
+
+  <h1>Scoped Router</h1>
+  <ul>
+    <li>
+      <a data-href='/hello' href='/hello'>/hello</a>
+    </li>
+    <li>
+      <a data-href='/hello/world' href='/hello/world'>/hello/world</a>
+    </li>
+    <li>
+      <a data-href='/hello/world/messages/starandtina' href='/hello/world/messages/starandtina'>/hello/world/starandtina</a>
+    </li>
+  </ul>
+
+
+  <script>
+      var routes = {
+        '/author': () => {
+          console.log('author');
+        },
+        '/books': [
+          () => {
+            console.log('books');
+          }, () => {
+            console.log('An inline route handler.');
+          }
+        ],
+        '/books': {
+          '/view/:bookId': {
+            on: (bookId) => {
+              console.log('viewBook: bookId is populated: ' + bookId);
+            }
+          }
+         }
+      };
+
+      var router = Router(routes);
+
+      router.configure({
+        html5history: true
+      });
+
+
+      // Scoped Router
+      router.path('/hello', function () {
+        this.path('/world', function () {
+          this.on('/messages/:wording', (wording) => {
+            console.log('Hello World: ' + wording);
+          });
+        });
+      });
+
+
+      router.init();
+
+      Array.prototype.forEach.call(document.querySelectorAll('a'), function (link) {
+        link.addEventListener('click', function (event) {
+          var href = link.dataset['href'];
+
+          if (router.history) {
+            router.setRoute(href);
+          }
+
+          event.preventDefault();
+        }, false);
+      });
+    </script>
+</body>
+</html>
